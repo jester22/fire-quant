@@ -1,46 +1,37 @@
-import React, { useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import { createMuiTheme, ThemeProvider as MUThemeProvider } from '@material-ui/core/styles';
+import React, { ReactNode } from 'react';
+import { RecoilRoot, useRecoilValue } from 'recoil';
+import { ThemeProvider } from 'styled-components';
 
-const electron = window.require('electron');
-const { ipcRenderer } = electron;
+import { themeState } from './atoms';
+import BaseLayout from './views/BaseLayout';
+
+interface Props {
+  children: ReactNode;
+}
+
+const ThemeRecoilProvider = ({ children }: Props) => {
+  const theme = createMuiTheme({
+    palette: {
+      type: useRecoilValue(themeState),
+    },
+  });
+  return (
+    <MUThemeProvider theme={theme}>
+      <ThemeProvider theme={theme}>{children}</ThemeProvider>
+    </MUThemeProvider>
+  );
+};
 
 function App() {
-
-  useEffect(() => {
-    // setting up an event listener to read data that background process
-		// will send via the main process after processing the data we
-		// send from visiable renderer process
-		ipcRenderer.on('MESSAGE_FROM_BACKGROUND_VIA_MAIN', (event, args) => {
-			console.log(args);
-		});
-
-		// trigger event to start background process
-		// can be triggered pretty much from anywhere after
-		// you have set up a listener to get the information
-		// back from background process, as I have done in line 13
-		ipcRenderer.send('START_BACKGROUND_VIA_MAIN', {
-			number: 25,
-		});
-  }, []);
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <RecoilRoot>
+      <ThemeRecoilProvider>
+        <CssBaseline />
+          <BaseLayout />
+      </ThemeRecoilProvider>
+    </RecoilRoot>
   );
 }
 
